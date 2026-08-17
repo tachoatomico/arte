@@ -1,192 +1,149 @@
-:root {
-  --bg: #0d0d0d;
-  --surface: #161616;
-  --text: #ececec;
-  --muted: #9a9a9a;
-  --accent: #ff0066;
-  --border: #262626;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-html, body {
-  height: 100%;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100%;
+    background: #0d0d0d;
+    color: #f5f5f5;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
 }
 
-.app {
-  max-width: 980px;
-  margin: 0 auto;
-  padding: 2rem 1.25rem 3rem;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+.container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 64px;
 }
 
-/* --- cabecera mínima --- */
-.site-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 2rem;
+.loading,
+.notfound {
+    text-align: center;
+    color: #888;
+    padding: 60px 0;
 }
 
-.site-brand {
-  font-size: 0.85rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--muted);
-  text-decoration: none;
+.artwork-image {
+    width: 100%;
+    max-height: 60vh;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #111;
 }
 
-.site-brand:hover { color: var(--text); }
-
-.site-tagline {
-  font-size: 0.75rem;
-  color: var(--muted);
-  font-style: italic;
+.title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-top: 20px;
+    line-height: 1.2;
 }
 
-/* --- estados --- */
-#loading {
-  text-align: center;
-  color: var(--muted);
-  padding: 4rem 0;
-  font-size: 0.9rem;
-  letter-spacing: 1px;
+.artist {
+    color: #ff0066;
+    margin-top: 4px;
+    font-weight: 500;
 }
 
-#not-found {
-  display: none;
-  text-align: center;
-  padding: 4rem 0;
-  color: var(--muted);
+.meta {
+    list-style: none;
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 24px;
 }
 
-#not-found h2 {
-  font-size: 1.4rem;
-  font-weight: 400;
-  color: var(--text);
-  margin-bottom: 0.5rem;
+.meta li span {
+    color: #888;
+    display: block;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
-#not-found p { font-size: 0.9rem; }
-
-/* --- ficha de la obra --- */
-#artwork {
-  display: none;
-  flex: 1;
+.meta li strong {
+    font-weight: 500;
+    color: #f0f0f0;
+    word-break: break-word;
 }
 
-.artwork-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  align-items: start;
+.description {
+    margin-top: 20px;
+    color: #ccc;
+    white-space: pre-line;
 }
 
-@media (max-width: 720px) {
-  .artwork-grid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
+.section {
+    margin-top: 36px;
 }
 
-/* imagen protagonista */
-.artwork-media {
-  width: 100%;
+.section h2 {
+    font-size: 0.85rem;
+    color: #ff0066;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border-bottom: 1px solid #222;
+    padding-bottom: 8px;
 }
 
-.artwork-media img {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 2px;
-  background: var(--surface);
+.events {
+    list-style: none;
+    margin-top: 8px;
 }
 
-/* información secundaria */
-.artwork-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+.event {
+    padding: 14px 0;
+    border-bottom: 1px solid #1a1a1a;
 }
 
-.artwork-title {
-  font-size: 2.2rem;
-  font-weight: 300;
-  letter-spacing: 4px;
-  line-height: 1.1;
-  text-transform: uppercase;
+.event-name {
+    font-weight: 500;
 }
 
-.artwork-meta {
-  font-size: 0.85rem;
-  color: var(--muted);
-  letter-spacing: 1px;
+.event-type {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #888;
 }
 
-.status {
-  display: none;
-  align-self: flex-start;
-  font-size: 0.7rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  padding: 0.35rem 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--muted);
+.owner {
+    margin-top: 2px;
+    font-weight: 500;
 }
 
-.status-created { color: var(--accent); border-color: var(--accent); }
-.status-exhibited { color: #4da3ff; border-color: #4da3ff; }
-.status-sold { color: #ffb84d; border-color: #ffb84d; }
-.status-transferred { color: #7d5cff; border-color: #7d5cff; }
-.status-archived { color: var(--muted); border-color: var(--border); }
-
-.artwork-detail {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
+.owner.locked {
+    color: #ff0066;
 }
 
-.detail-row {
-  display: grid;
-  grid-template-columns: 110px 1fr;
-  gap: 1rem;
-  font-size: 0.85rem;
+.event-date {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 2px;
 }
 
-.detail-label {
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 0.72rem;
+.event-desc {
+    margin-top: 6px;
+    color: #bbb;
+    font-size: 0.9rem;
+    white-space: pre-line;
 }
 
-.detail-value {
-  color: var(--text);
+.event-link {
+    display: inline-block;
+    margin-top: 6px;
+    color: #ff0066;
+    font-size: 0.85rem;
+    text-decoration: none;
 }
 
-/* --- pie --- */
-.site-footer {
-  margin-top: 3rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-  text-align: center;
-  font-size: 0.7rem;
-  color: var(--muted);
-  letter-spacing: 1px;
+.event-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+    .meta {
+        grid-template-columns: 1fr;
+    }
 }
