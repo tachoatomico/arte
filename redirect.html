@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARTid</title>
+<style>
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #0d0d0d; color: #e0e0e0; font-family: 'Inter', Arial, sans-serif; }
+  .wrap { max-width: 640px; padding: 1.5rem; }
+  p { font-size: 0.9rem; letter-spacing: 1px; }
+  .debug { display: none; background: #161616; border: 1px solid #262626; border-radius: 8px; padding: 1rem; margin-top: 1rem; font-family: monospace; font-size: 0.8rem; line-height: 1.6; word-break: break-all; }
+  .debug div { margin-bottom: 0.5rem; }
+  .k { color: #ff0066; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p id="msg">redirigiendo…</p>
+  <div class="debug" id="debug"></div>
+</div>
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var art = params.get('art') || params.get('id') || params.get('obra');
+  var debug = params.get('debug');
+
+  if (debug !== null) {
+    // modo debug: mostrar cómo llega la info y NO redirigir
+    var filas = [
+      ['href', window.location.href],
+      ['search', window.location.search || '(vacío)'],
+      ['hash', window.location.hash || '(vacío)'],
+      ['art', params.get('art') || '(no)'],
+      ['id', params.get('id') || '(no)'],
+      ['obra', params.get('obra') || '(no)'],
+      ['resultado', art ? ('#/art/' + art) : '(sin arte)']
+    ];
+    document.getElementById('msg').textContent = 'DEBUG — así llega la info desde el short URL';
+    var d = document.getElementById('debug');
+    filas.forEach(function (f) {
+      var div = document.createElement('div');
+      div.innerHTML = '<span class="k">' + f[0] + '</span>: ' + f[1];
+      d.appendChild(div);
+    });
+    d.style.display = 'block';
+    return;
+  }
+
+  if (art) {
+    window.location.replace('./#/art/' + art);
+  } else {
+    window.location.replace('./');
+  }
+})();
+</script>
+</body>
+</html>
