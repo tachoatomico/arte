@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARTid — editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --text: #ececec;
+    --muted: #9a9a9a;
+    --accent: #ff0066;
+    --border: #262626;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+  .site-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding-bottom: 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem;
+  }
+  .site-brand { font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); text-decoration: none; }
+  .site-brand:hover { color: var(--text); }
+  h1 { font-size: 1.5rem; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.25rem; }
+  .subtitulo { font-size: 0.8rem; color: var(--muted); margin-bottom: 1.5rem; }
+
+  .selector { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+  select {
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; min-width: 220px;
+  }
+  .btn {
+    background: transparent; color: var(--text); border: 1px solid var(--border);
+    padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer;
+    letter-spacing: 1px; text-transform: uppercase;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-accent:hover { opacity: 0.85; color: #fff; }
+
+  .form {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem;
+  }
+  .campo { display: flex; flex-direction: column; gap: 0.35rem; }
+  .campo-full { grid-column: 1 / -1; }
+  label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  input, select, textarea {
+    background: var(--bg); color: var(--text); border: 1px solid var(--border);
+    padding: 0.6rem 0.75rem; border-radius: 6px; font-size: 0.9rem; font-family: inherit;
+  }
+  textarea { min-height: 100px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+
+  .acciones { display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .estado { font-size: 0.8rem; color: var(--muted); margin-top: 1rem; }
+
+  .nota {
+    background: var(--surface); border: 1px dashed var(--border); border-radius: 8px;
+    padding: 1rem; font-size: 0.8rem; color: var(--muted); margin-top: 1.5rem; line-height: 1.6;
+  }
+  .nota code { color: var(--accent); }
+
+  @media (max-width: 640px) { .form { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="site-header">
+    <a class="site-brand" href="./">@tachoatomico</a>
+    <span class="site-tagline" style="font-size:0.75rem;color:var(--muted);font-style:italic;">editor ARTid</span>
+  </header>
+
+  <h1>Editor de obras</h1>
+  <p class="subtitulo">Edita el metadata.json de cada obra. Al guardar, descarga o copia el JSON para commitearlo manualmente.</p>
+
+  <div class="selector">
+    <select id="obra-select"></select>
+    <button class="btn" id="btn-nueva">Nueva obra</button>
+  </div>
+
+  <form class="form" id="form">
+    <div class="campo campo-full">
+      <label>artwork_id</label>
+      <input id="f-id" type="text" placeholder="NATURAI-4.0">
+    </div>
+    <div class="campo">
+      <label>Título</label>
+      <input id="f-title" type="text" placeholder="naturAI 4.0">
+    </div>
+    <div class="campo">
+      <label>Artista</label>
+      <input id="f-artist" type="text" placeholder="@tachoatomico">
+    </div>
+    <div class="campo">
+      <label>Año</label>
+      <input id="f-year" type="text" placeholder="2026">
+    </div>
+    <div class="campo">
+      <label>Edición</label>
+      <input id="f-edition" type="text" placeholder="1/1">
+    </div>
+    <div class="campo">
+      <label>Estado</label>
+      <select id="f-status">
+        <option value="created">created</option>
+        <option value="exhibited">exhibited</option>
+        <option value="sold">sold</option>
+        <option value="transferred">transferred</option>
+        <option value="archived">archived</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label>Serie</label>
+      <input id="f-series" type="text" placeholder="naturAI">
+    </div>
+    <div class="campo">
+      <label>Técnica</label>
+      <input id="f-technique" type="text" placeholder="">
+    </div>
+    <div class="campo">
+      <label>Dimensiones</label>
+      <input id="f-dimensions" type="text" placeholder="">
+    </div>
+    <div class="campo">
+      <label>Ubicación</label>
+      <input id="f-location" type="text" placeholder="">
+    </div>
+    <div class="campo">
+      <label>Propietario</label>
+      <input id="f-owner" type="text" placeholder="">
+    </div>
+    <div class="campo">
+      <label>Imagen (archivo)</label>
+      <input id="f-image" type="text" placeholder="naturai-4-0.png">
+    </div>
+    <div class="campo campo-full">
+      <label>Descripción</label>
+      <textarea id="f-description" placeholder=""></textarea>
+    </div>
+  </form>
+
+  <div class="acciones">
+    <button class="btn btn-accent" id="btn-descargar">Descargar JSON</button>
+    <button class="btn" id="btn-copiar">Copiar JSON</button>
+  </div>
+
+  <div class="estado" id="estado"></div>
+
+  <div class="nota">
+    El editor no guarda en GitHub (sitio estático). Para aplicar el cambio:<br>
+    1) <strong>Descargar/Copiar JSON</strong> · 2) reemplazá <code>artworks/&lt;id&gt;/metadata.json</code> · 3) hacé commit.<br>
+    Para una obra nueva, además agregá su <code>artwork_id</code> al <code>artworks/manifest.json</code>.
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var CAMBIOS = {
+    'f-id': 'artwork_id', 'f-title': 'title', 'f-artist': 'artist',
+    'f-year': 'year', 'f-edition': 'edition', 'f-status': 'status',
+    'f-series': 'series', 'f-technique': 'technique', 'f-dimensions': 'dimensions',
+    'f-location': 'location', 'f-owner': 'owner', 'f-image': 'image',
+    'f-description': 'description'
+  };
+
+  var select = document.getElementById('obra-select');
+  var form = document.getElementById('form');
+  var estado = document.getElementById('estado');
+  var obraActual = null;
+
+  function limpiarForm() {
+    Object.keys(CAMBIOS).forEach(function (id) {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('f-status').value = 'created';
+    document.getElementById('f-artist').value = '@tachoatomico';
+    document.getElementById('f-edition').value = '1/1';
+  }
+
+  function cargarForm(meta) {
+    limpiarForm();
+    Object.keys(CAMBIOS).forEach(function (id) {
+      var campo = CAMBIOS[id];
+      if (meta[campo] !== undefined && meta[campo] !== null) {
+        document.getElementById(id).value = meta[campo];
+      }
+    });
+  }
+
+  function leerForm() {
+    var meta = {};
+    Object.keys(CAMBIOS).forEach(function (id) {
+      var campo = CAMBIOS[id];
+      var v = document.getElementById(id).value.trim();
+      if (v !== '') {
+        meta[campo] = (campo === 'year') ? v : v;
+      }
+    });
+    if (!meta.artwork_id) {
+      meta.artwork_id = document.getElementById('f-id').value.trim() || 'NUEVA-OBRA';
+    }
+    return meta;
+  }
+
+  function cargarObra(id) {
+    obraActual = id;
+    fetch('artworks/' + id + '/metadata.json')
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(cargarForm)
+      .catch(function () { cargarForm({}); });
+  }
+
+  function llenarSelect() {
+    fetch('artworks/manifest.json')
+      .then(function (r) { return r.json(); })
+      .then(function (ids) {
+        select.innerHTML = '';
+        ids.forEach(function (id) {
+          var op = document.createElement('option');
+          op.value = id; op.textContent = id;
+          select.appendChild(op);
+        });
+        if (ids.length) cargarObra(ids[0]);
+      })
+      .catch(function () {
+        estado.textContent = 'No se pudo cargar el manifiesto.';
+      });
+  }
+
+  function generarJSON() {
+    var meta = leerForm();
+    return JSON.stringify(meta, null, 2);
+  }
+
+  document.getElementById('btn-descargar').addEventListener('click', function () {
+    var json = generarJSON();
+    var id = leerForm().artwork_id;
+    var blob = new Blob([json + '\n'], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = id + '.metadata.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    estado.textContent = 'JSON generado: ' + id + '.metadata.json';
+  });
+
+  document.getElementById('btn-copiar').addEventListener('click', function () {
+    var json = generarJSON();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(json).then(function () {
+        estado.textContent = 'JSON copiado al portapapeles.';
+      });
+    } else {
+      estado.textContent = json;
+    }
+  });
+
+  document.getElementById('btn-nueva').addEventListener('click', function () {
+    obraActual = null;
+    select.value = '';
+    limpiarForm();
+    estado.textContent = 'Nueva obra. Completá los campos y descargá el JSON.';
+  });
+
+  select.addEventListener('change', function () {
+    if (select.value) cargarObra(select.value);
+  });
+
+  llenarSelect();
+})();
+</script>
+</body>
+</html>
