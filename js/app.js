@@ -1,154 +1,122 @@
-// ===== Sistema de identidad digital para obras de arte =====
-// QR -> Short URL -> app web genérica -> metadata.json en GitHub
-
 (function () {
-  'use strict';
+    'use strict';
 
-  // Elementos del DOM
-  var elArtwork = document.getElementById('artwork');
-  var elImage = document.getElementById('artwork-image');
-  var elTitle = document.getElementById('artwork-title');
-  var elMeta = document.getElementById('artwork-meta');
-  var elDetail = document.getElementById('artwork-detail');
-  var elStatus = document.getElementById('artwork-status');
-  var elLoading = document.getElementById('loading');
-  var elNotFound = document.getElementById('not-found');
+    var app = document.getElementById('app');
 
-  // Estados conocidos y su presentación
-  var ESTADOS = {
-    created: 'creada',
-    exhibited: 'en exhibición',
-    sold: 'vendida',
-    transferred: 'transferida',
-    archived: 'archivada'
-  };
-
-  // Extraer artwork_id desde el hash: #/art/INTERCAMBIOS -> INTERCAMBIOS
-  function obtenerArtworkId() {
-    var hash = window.location.hash || '';
-    // quitar '#' inicial
-    hash = hash.replace(/^#\/?/, '');
-    // dividir por '/'
-    var partes = hash.split('/').filter(function (p) { return p.length > 0; });
-    // el último segmento no vacío es el id (permite /art/INTERCAMBIOS o /INTERCAMBIOS)
-    if (partes.length === 0) return null;
-    return partes[partes.length - 1].toUpperCase();
-  }
-
-  // Construir ruta relativa a metadata.json
-  function rutaMetadata(id) {
-    return 'artworks/' + id + '/metadata.json';
-  }
-
-  // Renderizar la ficha de la obra
-  function renderizar(meta) {
-    // Título
-    elTitle.textContent = meta.title || meta.artwork_id || 'Obra';
-
-    // Imagen
-    if (meta.image) {
-      elImage.src = 'artworks/' + meta.artwork_id + '/' + meta.image;
-      elImage.alt = meta.title || meta.artwork_id || '';
-    } else {
-      elImage.style.display = 'none';
+    function esc(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
     }
 
-    // Línea de metadatos primarios (artista · año · edición)
-    var partesMeta = [];
-    if (meta.artist) partesMeta.push(meta.artist);
-    if (meta.year) partesMeta.push(String(meta.year));
-    if (meta.edition) partesMeta.push('edición ' + meta.edition);
-    elMeta.textContent = partesMeta.join(' · ');
-
-    // Detalles secundarios opcionales
-    var detalles = [];
-    var campos = [
-      ['series', 'Serie'],
-      ['technique', 'Técnica'],
-      ['dimensions', 'Dimensiones'],
-      ['description', 'Descripción'],
-      ['location', 'Ubicación'],
-      ['owner', 'Propietario']
-    ];
-    campos.forEach(function (c) {
-      if (meta[c[0]]) {
-        detalles.push({ label: c[1], value: meta[c[0]] });
-      }
-    });
-    elDetail.innerHTML = '';
-    detalles.forEach(function (d) {
-      var fila = document.createElement('div');
-      fila.className = 'detail-row';
-      var label = document.createElement('span');
-      label.className = 'detail-label';
-      label.textContent = d.label;
-      var valor = document.createElement('span');
-      valor.className = 'detail-value';
-      valor.textContent = d.value;
-      fila.appendChild(label);
-      fila.appendChild(valor);
-      elDetail.appendChild(fila);
-    });
-
-    // Estado
-    var estado = meta.status || 'created';
-    elStatus.textContent = ESTADOS[estado] || estado;
-    elStatus.className = 'status status-' + estado;
-    elStatus.style.display = 'inline-block';
-
-    elLoading.style.display = 'none';
-    elArtwork.style.display = 'block';
-    elNotFound.style.display = 'none';
-  }
-
-  function mostrarNoEncontrado() {
-    elLoading.style.display = 'none';
-    elArtwork.style.display = 'none';
-    elNotFound.style.display = 'block';
-  }
-
-  // Cargar y mostrar la obra
-  function cargarObra(id) {
-    elLoading.style.display = 'block';
-    elArtwork.style.display = 'none';
-    elNotFound.style.display = 'none';
-
-    fetch(rutaMetadata(id))
-      .then(function (resp) {
-        if (!resp.ok) throw new Error('not found');
-        return resp.json();
-      })
-      .then(function (meta) {
-        // asegurar artwork_id
-        if (!meta.artwork_id) meta.artwork_id = id;
-        renderizar(meta);
-      })
-      .catch(function () {
-        mostrarNoEncontrado();
-      });
-  }
-
-  // Iniciar
-  function iniciar() {
-    var id = obtenerArtworkId();
-    if (!id) {
-      // sin hash: pantalla vacía / índice
-      elLoading.style.display = 'none';
-      elArtwork.style.display = 'none';
-      elNotFound.style.display = 'block';
-      document.getElementById('not-found').querySelector('p').textContent =
-        'Sin obra solicitada. Agrega /#/art/ARTWORK_ID a la URL.';
-      return;
+    function notFound() {
+        app.innerHTML = '<p class="notfound">Obra no encontrada.</p>';
     }
-    cargarObra(id);
-  }
 
-  // escuchar cambios de hash (navegación)
-  window.addEventListener('hashchange', iniciar);
-  document.addEventListener('DOMContentLoaded', iniciar);
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', iniciar);
-  } else {
-    iniciar();
-  }
+    function renderMetaList(meta) {
+        var fields = [];
+        if (meta.year) fields.push(['Año', meta.year]);
+        if (meta.edition) fields.push(['Edición', meta.edition]);
+        if (meta.status) fields.push(['Estado', meta.status]);
+        if (meta.series) fields.push(['Serie', meta.series]);
+        if (meta.technique) fields.push(['Técnica', meta.technique]);
+        if (meta.dimensions) fields.push(['Dimensiones', meta.dimensions]);
+        if (meta.location) fields.push(['Ubicación', meta.location]);
+        if (meta.owner) fields.push(['Propietario', meta.owner]);
+
+        if (!fields.length) return '';
+
+        return '<ul class="meta">' + fields.map(function (f) {
+            return '<li><span>' + esc(f[0]) + '</span><strong>' + esc(f[1]) + '</strong></li>';
+        }).join('') + '</ul>';
+    }
+
+    function renderExhibitions(list) {
+        if (!list || !list.length) return '';
+
+        var items = list.map(function (e) {
+            var html = '<li class="event">';
+            html += '<div class="event-name">' + esc(e.name) + '</div>';
+            if (e.date) html += '<div class="event-date">' + esc(e.date) + '</div>';
+            if (e.description) html += '<div class="event-desc">' + esc(e.description) + '</div>';
+            if (e.links) html += '<a class="event-link" href="' + esc(e.links) + '" target="_blank" rel="noopener">Enlace</a>';
+            html += '</li>';
+            return html;
+        }).join('');
+
+        return '<section class="section"><h2>Exposiciones</h2><ul class="events">' + items + '</ul></section>';
+    }
+
+    function renderOwnership(list) {
+        if (!list || !list.length) return '';
+
+        var items = list.map(function (o) {
+            var type = o.type === 'transfer' ? 'Transferencia / Venta' : 'Propietario inicial';
+            var owner = o.owner
+                ? '<div class="owner">' + esc(o.owner) + '</div>'
+                : '<div class="owner locked">&#128274; Propietario protegido</div>';
+
+            var html = '<li class="event">';
+            html += '<div class="event-type">' + esc(type) + '</div>';
+            html += owner;
+            if (o.date) html += '<div class="event-date">' + esc(o.date) + '</div>';
+            if (o.notes) html += '<div class="event-desc">' + esc(o.notes) + '</div>';
+            html += '</li>';
+            return html;
+        }).join('');
+
+        return '<section class="section"><h2>Proveniencia</h2><ul class="events">' + items + '</ul></section>';
+    }
+
+    function render(meta, exhibitions, ownerships, id) {
+        var image = meta.image
+            ? '<img class="artwork-image" src="artworks/' + encodeURIComponent(id) + '/' + encodeURIComponent(meta.image) + '" alt="' + esc(meta.title) + '">'
+            : '';
+
+        var html = '<article class="artwork">';
+        html += image;
+        html += '<h1 class="title">' + esc(meta.title) + '</h1>';
+        if (meta.artist) html += '<p class="artist">' + esc(meta.artist) + '</p>';
+        html += renderMetaList(meta);
+        if (meta.description) html += '<p class="description">' + esc(meta.description) + '</p>';
+        html += renderExhibitions(exhibitions);
+        html += renderOwnership(ownerships);
+        html += '</article>';
+
+        app.innerHTML = html;
+    }
+
+    var match = window.location.hash.match(/^#\/art\/([A-Za-z0-9._-]+)/);
+
+    if (!match) {
+        notFound();
+        return;
+    }
+
+    var id = match[1].toUpperCase();
+
+    Promise.all([
+        fetch('artworks/' + id + '/metadata.json'),
+        fetch('artworks/' + id + '/exhibitions.json'),
+        fetch('artworks/' + id + '/ownership.json')
+    ]).then(function (responses) {
+        var metaRes = responses[0];
+        var exRes = responses[1];
+        var owRes = responses[2];
+
+        if (!metaRes.ok) {
+            notFound();
+            return;
+        }
+
+        return Promise.all([
+            metaRes.json(),
+            exRes.ok ? exRes.json() : Promise.resolve([]),
+            owRes.ok ? owRes.json() : Promise.resolve([])
+        ]).then(function (data) {
+            render(data[0], data[1], data[2], id);
+        });
+    }).catch(function () {
+        notFound();
+    });
 })();
