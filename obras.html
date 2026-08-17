@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARTid — obras</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --text: #ececec;
+    --muted: #9a9a9a;
+    --accent: #ff0066;
+    --border: #262626;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+  .site-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  .site-brand { font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); text-decoration: none; }
+  .site-brand:hover { color: var(--text); }
+  .site-tagline { font-size: 0.75rem; color: var(--muted); font-style: italic; }
+
+  h1 { font-size: 1.8rem; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .subtitulo { font-size: 0.8rem; color: var(--muted); margin-bottom: 2rem; }
+
+  .obras-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+  }
+  .obra-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .obra-qr {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 0.75rem;
+    align-self: center;
+  }
+  .obra-qr img { display: block; width: 160px; height: 160px; }
+  .obra-titulo { font-size: 0.95rem; letter-spacing: 1px; text-transform: uppercase; }
+  .obra-url { font-size: 0.7rem; color: var(--muted); word-break: break-all; }
+
+  #loading { text-align: center; color: var(--muted); padding: 3rem 0; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header class="site-header">
+    <a class="site-brand" href="#/">@tachoatomico</a>
+    <span class="site-tagline">enganche cuántico con el arte</span>
+  </header>
+
+  <h1>Obras</h1>
+  <p class="subtitulo">Códigos QR para la identidad digital de cada obra</p>
+
+  <div id="loading">cargando obras…</div>
+  <div class="obras-grid" id="obras"></div>
+
+</div>
+
+<script>
+(function () {
+  var SHORT = 'https://tatomico.s.gy?art=';
+
+  function renderQR(id) {
+    var url = SHORT + id;
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(url);
+  }
+
+  function cardHTML(id, title) {
+    return '<div class="obra-card">' +
+      '<div class="obra-qr"><img src="' + renderQR(id) + '" alt="QR ' + id + '"></div>' +
+      '<div class="obra-titulo">' + title + '</div>' +
+      '<div class="obra-url">' + SHORT + id + '</div>' +
+    '</div>';
+  }
+
+  var el = document.getElementById('obras');
+  var loading = document.getElementById('loading');
+
+  fetch('artworks/manifest.json')
+    .then(function (r) { return r.json(); })
+    .then(function (ids) {
+      loading.style.display = 'none';
+      ids.forEach(function (id) {
+        // intentar obtener el título desde metadata; si no, usar el id
+        fetch('artworks/' + id + '/metadata.json')
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .catch(function () { return null; })
+          .then(function (meta) {
+            var title = (meta && meta.title) ? meta.title : id;
+            el.insertAdjacentHTML('beforeend', cardHTML(id, title));
+          });
+      });
+    })
+    .catch(function () {
+      loading.textContent = 'No se pudo cargar el manifiesto de obras.';
+    });
+})();
+</script>
+</body>
+</html>
